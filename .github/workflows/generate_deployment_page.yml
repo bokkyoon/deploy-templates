@@ -38,7 +38,7 @@ jobs:
       - name: Checkout the repo calling the workflow
         uses: actions/checkout@v3
         with:
-          repository: 'SN-DKR-DIG-TMP/digital-tmp-deploy-templates'
+          repository: 'bokkyoon/deploy-templates'
           token: ${{ secrets.GITHUB_TOKEN }}
           path: deploy-templates
 
@@ -67,7 +67,7 @@ jobs:
           cp deploy-templates/pages/templates/deployment_history.html temp/
 
       - name: Configurer Git
-        uses: SN-DKR-DIG-TMP/digital-tmp-workflow-actions/actions/config-git@main
+        uses: bokkyoon/workflow-actions/actions/config-git@main
         with:
           github_username: ${{ secrets.GITHUB_USERNAME }}
           github_token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}

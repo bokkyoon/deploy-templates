@@ -80,7 +80,7 @@ jobs:
 
   call-build:
     name: build
-    uses: SN-DKR-DIG-TMP/digital-tmp-workflow-templates/.github/workflows/template-deploy-global.yml@main
+    uses: bokkyoon/workflow-templates/.github/workflows/template-deploy-global.yml@main
     with:
       workflow_file: ${{ inputs.workflow_file }}
       environment_approved: ${{ inputs.environment_approved }}
@@ -164,7 +164,7 @@ jobs:
       - name: Checkout the repo calling the workflow
         uses: actions/checkout@v3
         with:
-          repository: 'SN-DKR-DIG-TMP/digital-tmp-deploy-templates'
+          repository: 'bokkyoon/deploy-templates'
           token: ${{ secrets.GITHUB_TOKEN }}
           path: deploy-templates
 

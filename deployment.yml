@@ -1,6 +1,6 @@
 modules:
   - name: module1
-    image: ghcr.io/sn-dkr-dig-tmp/module1:1.2.3
+    image: ghcr.io/bokkyoon/module1:1.2.3
     external_port: 8080
     internal_port: 3000
     replicas: 2
@@ -16,7 +16,7 @@ modules:
       ENV_VAR_1: "value1"
       ENV_VAR_2: "value2"
   - name: module2
-    image: ghcr.io/sn-dkr-dig-tmp/module1:1.2.3
+    image: ghcr.io/bokkyoon/module1:1.2.3
     external_port: 8081
     internal_port: 5000
     replicas: 1

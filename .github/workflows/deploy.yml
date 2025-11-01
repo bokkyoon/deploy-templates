@@ -56,7 +56,7 @@ jobs:
     - name: Checkout the repo calling the workflow
       uses: actions/checkout@v3
       with:
-        repository: 'SN-DKR-DIG-TMP/digital-tmp-deploy-templates'
+        repository: 'bokkyoon/deploy-templates'
         token: ${{ secrets.GITHUB_TOKEN }}
         path: deploy-templates
 

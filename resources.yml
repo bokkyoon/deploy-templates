@@ -11,4 +11,4 @@ nginx_local:
 templates:
   dev:
     - source: templates/dev/portail-web/config.json
-      dest: opt/adp/portail-web/config.json
+      dest: opt/evisa/portail-web/config.json
