@@ -209,7 +209,7 @@ jobs:
           mkdir -p inventory
           cat <<EOF > inventory/inventory.ini
           [servers]
-          ${MATRIX_SERVER_NAME} ansible_host=${MATRIX_SERVER_HOST} ansible_user=${{ vars.SERVER_USER }} ansible_ssh_common_args='-A -o StrictHostKeyChecking=no'
+          ${MATRIX_SERVER_NAME} ansible_host=${MATRIX_SERVER_HOST} ansible_port=${MATRIX_SERVER_PORT} ansible_user=${{ vars.SERVER_USER }} ansible_ssh_common_args='-A -o StrictHostKeyChecking=no'
 
           [servers:vars]
           ansible_python_interpreter=/usr/bin/python3
@@ -217,6 +217,7 @@ jobs:
         env:
           MATRIX_SERVER_NAME: ${{ matrix.server.name }}
           MATRIX_SERVER_HOST: ${{ matrix.server.ansible_host }}
+          MATRIX_SERVER_PORT: ${{ matrix.server.ansible_port || '22' }}
 
       - name: Configurer les variables d’environnement
         run: |
