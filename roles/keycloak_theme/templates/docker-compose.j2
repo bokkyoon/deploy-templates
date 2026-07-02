@@ -61,7 +61,7 @@ services:
         - "traefik.enable=true"
         - "traefik.docker.network={{ proxy_network }}"
         - "traefik.http.routers.{{ module.name }}.rule=Host(`{{ module.server_name }}`)"
-        - "traefik.http.routers.{{ module.name }}.entrypoints=websecure"
+        - "traefik.http.routers.{{ module.name }}.entrypoints=websecure{{ ',internalhttps' if module.internal_entrypoint | default(false) else '' }}"
         - "traefik.http.routers.{{ module.name }}.tls=true"
         - "traefik.http.routers.{{ module.name }}.tls.certresolver=letsencrypt"
         - "traefik.http.services.{{ module.name }}.loadbalancer.server.port={{ module.internal_port | default('80') }}"
