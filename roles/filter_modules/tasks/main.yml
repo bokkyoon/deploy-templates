@@ -43,52 +43,17 @@
     msg: "{{ item.Spec.Name }} ➜ {{ item.Spec.TaskTemplate.ContainerSpec.Image | default('(no image)') }}"
   loop: "{{ stack_services }}"
 
-- name: Initialiser la liste des services/images
+- name: Calculer le plan de déploiement (force_restart, nouveau module, image ou environnement modifié)
   set_fact:
-    container_images_list: []
+    deploy_plan: "{{ modules | deploy_plan(stack_services, project_name, secrets | default([])) }}"
 
-- name: Ajouter service ➜ image
-  set_fact:
-    container_images_list: "{{ container_images_list + [ {'name': item.Spec.Name, 'image': item.Spec.TaskTemplate.ContainerSpec.Image | default('(no image)') } ] }}"
-  loop: "{{ stack_services }}"
-
-- name: Afficher container_images_list (images utilisées par les services du stack)
+- name: Afficher les modules à déployer et la raison
   debug:
-    msg: "{{ container_images_list }}"
-
-- name: Afficher les modules à déployer (nouvelle image)
-  debug:
-    msg: |
-      Modules à déployer (nouvelle image) :
-      {% for mod in modules
-         if mod.image not in container_images_list | map(attribute='image') | list %}
-      - {{ mod.name }} => {{ mod.image }}
-      {% endfor %}
-
-- name: Afficher les noms des modules à redémarrer de force
-  debug:
-    msg: |
-      Modules à redémarrer de force :
-      {% for mod in modules | selectattr('force_restart', 'defined') | selectattr('force_restart', 'equalto', true) %}
-      - {{ mod.name }}
-      {% endfor %}
-
+    msg: "{{ deploy_plan.reasons | default(['aucun module à déployer'], true) }}"
 
 - name: Filtrer les modules à installer ou redémarrer (sans doublons)
   set_fact:
-    modules_to_deploy: >-
-      {{
-        (
-          modules 
-          | rejectattr('image', 'in', container_images_list | map(attribute='image') | list)
-          + 
-          modules 
-          | selectattr('force_restart', 'defined') 
-          | selectattr('force_restart', 'equalto', true)
-        ) 
-        | unique(attribute='name') 
-        | list
-      }}
+    modules_to_deploy: "{{ deploy_plan.modules }}"
 
 
 - name: Valider qu'il n'y a pas de doublons

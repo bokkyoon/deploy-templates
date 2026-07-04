@@ -60,3 +60,5 @@ settings.xml
 settings-security.xml
 
 local-npm-cache/
+
+__pycache__/

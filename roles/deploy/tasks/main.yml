@@ -63,6 +63,12 @@
   notify:
     - Attendre la stabilisation du réseau
 
+- name: Arrêter les services des modules désactivés (enable false)
+  community.docker.docker_swarm_service:
+    name: "{{ project_name }}_{{ item }}"
+    state: absent
+  loop: "{{ deploy_plan.to_remove | default([]) }}"
+
 - name: Appliquer les secrets
   set_fact:
     modules_to_deploy: "{{ modules_to_deploy | inject_secrets(secrets) }}"
