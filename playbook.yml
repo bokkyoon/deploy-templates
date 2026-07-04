@@ -8,4 +8,5 @@
     - role: filter_modules
     - role: deploy
     - role: keycloak_theme
+    - role: cleanup_images
     #- role: restart

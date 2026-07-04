@@ -1,0 +1,5 @@
+---
+# Active/désactive le nettoyage automatique après déploiement
+prune_images: true
+# Seules les images inutilisées créées il y a plus longtemps que ce délai sont supprimées
+image_prune_until: "72h"

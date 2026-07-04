@@ -1,0 +1,19 @@
+---
+# Nettoyage du disque après déploiement : suppression des images inutilisées
+# (aucun conteneur n'est touché).
+
+- name: Supprimer les images inutilisées de plus de {{ image_prune_until }}
+  community.docker.docker_prune:
+    images: true
+    images_filters:
+      dangling: false
+      until: "{{ image_prune_until }}"
+  when: prune_images | bool
+  register: image_prune_result
+
+- name: Afficher le résultat du nettoyage
+  debug:
+    msg: >-
+      Nettoyage : {{ image_prune_result.images_deleted | default([]) | length }} image(s) supprimée(s),
+      {{ ((image_prune_result.images_space_reclaimed | default(0)) / 1024 / 1024) | round(1) }} Mo libérés
+  when: prune_images | bool
