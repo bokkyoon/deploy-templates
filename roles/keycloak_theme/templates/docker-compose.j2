@@ -64,6 +64,18 @@ services:
         - "traefik.http.routers.{{ module.name }}.entrypoints=websecure{{ ',internalhttps' if module.internal_entrypoint | default(false) else '' }}"
         - "traefik.http.routers.{{ module.name }}.tls=true"
         - "traefik.http.routers.{{ module.name }}.tls.certresolver=letsencrypt"
+{% if module.restrict_paths is defined %}
+        # Chemins restreints ({{ module.restrict_paths | join(', ') }}) : accessibles uniquement depuis les réseaux internes/VPN.
+        # Router plus prioritaire + ipAllowList → source publique = 403.
+        - "traefik.http.routers.{{ module.name }}-restricted.rule=Host(`{{ module.server_name }}`) && ({% for p in module.restrict_paths %}PathPrefix(`{{ p }}`){{ ' || ' if not loop.last else '' }}{% endfor %})"
+        - "traefik.http.routers.{{ module.name }}-restricted.entrypoints=websecure{{ ',internalhttps' if module.internal_entrypoint | default(false) else '' }}"
+        - "traefik.http.routers.{{ module.name }}-restricted.priority=1000"
+        - "traefik.http.routers.{{ module.name }}-restricted.tls=true"
+        - "traefik.http.routers.{{ module.name }}-restricted.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.{{ module.name }}-restricted.service={{ module.name }}"
+        - "traefik.http.routers.{{ module.name }}-restricted.middlewares={{ module.name }}-restrictip"
+        - "traefik.http.middlewares.{{ module.name }}-restrictip.ipallowlist.sourcerange={{ module.restrict_source_range | default('10.0.0.0/8,172.16.0.0/12,192.168.0.0/16') }}"
+{% endif %}
         - "traefik.http.services.{{ module.name }}.loadbalancer.server.port={{ module.internal_port | default('80') }}"
         # Redirection HTTP vers HTTPS
         - "traefik.http.routers.{{ module.name }}-http.rule=Host(`{{ module.server_name }}`)"
