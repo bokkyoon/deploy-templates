@@ -38,6 +38,10 @@ services:
 {% for constraint in module.placement.constraints %}
           - {{ constraint }}
 {% endfor %}
+{% elif default_placement_constraints is defined %}
+{% for constraint in default_placement_constraints %}
+          - {{ constraint }}
+{% endfor %}
 {% else %}
           - node.role == manager
 {% endif %}
