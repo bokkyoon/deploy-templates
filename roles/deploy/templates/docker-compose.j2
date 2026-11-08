@@ -80,6 +80,19 @@ services:
         - "traefik.http.routers.{{ module.name }}-restricted.middlewares={{ module.name }}-restrictip"
         - "traefik.http.middlewares.{{ module.name }}-restrictip.ipallowlist.sourcerange={{ module.restrict_source_range | default('10.0.0.0/8,172.16.0.0/12,192.168.0.0/16') }}"
 {% endif %}
+{% for redirect in module.redirects | default([]) %}
+        # Redirection « {{ redirect.name }} » vers {{ redirect.to }}{{ ', sauf depuis les réseaux internes/VPN' if redirect.except_internal | default(false) else '' }}.
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.rule=Host(`{{ module.server_name }}`) && ({{ redirect.rule }}){% if redirect.except_internal | default(false) %} && !({% for range in (module.restrict_source_range | default('10.0.0.0/8,172.16.0.0/12,192.168.0.0/16')).split(',') %}ClientIP(`{{ range | trim }}`){{ ' || ' if not loop.last else '' }}{% endfor %}){% endif %}"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.entrypoints=websecure"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.priority=900"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.tls=true"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.service={{ module.name }}"
+        - "traefik.http.routers.{{ module.name }}-redirect-{{ redirect.name }}.middlewares={{ module.name }}-redirect-{{ redirect.name }}"
+        - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.regex=^.*$$"
+        - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.replacement={{ redirect.to }}"
+        - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.permanent=false"
+{% endfor %}
         - "traefik.http.services.{{ module.name }}.loadbalancer.server.port={{ module.internal_port | default('80') }}"
         # Redirection HTTP vers HTTPS
         - "traefik.http.routers.{{ module.name }}-http.rule=Host(`{{ module.server_name }}`)"
