@@ -93,7 +93,8 @@ services:
         - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.replacement={{ redirect.to }}"
         - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.permanent=false"
 {% endfor %}
-{% set redirect_hosts = [module.redirect_hosts] if module.redirect_hosts is string else (module.redirect_hosts | default([])) %}
+{% set redirect_hosts = module.redirect_hosts | default([]) %}
+{% set redirect_hosts = [redirect_hosts] if redirect_hosts is string else redirect_hosts %}
 {% if redirect_hosts | length > 0 %}
         # Domaines secondaires ({{ redirect_hosts | join(', ') }}) : redirection permanente (301)
         # vers https://{{ module.server_name }}, chemin et query string conserves, en HTTP comme en HTTPS.
