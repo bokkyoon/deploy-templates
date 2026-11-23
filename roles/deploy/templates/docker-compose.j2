@@ -93,6 +93,24 @@ services:
         - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.replacement={{ redirect.to }}"
         - "traefik.http.middlewares.{{ module.name }}-redirect-{{ redirect.name }}.redirectregex.permanent=false"
 {% endfor %}
+{% set redirect_hosts = [module.redirect_hosts] if module.redirect_hosts is string else (module.redirect_hosts | default([])) %}
+{% if redirect_hosts | length > 0 %}
+        # Domaines secondaires ({{ redirect_hosts | join(', ') }}) : redirection permanente (301)
+        # vers https://{{ module.server_name }}, chemin et query string conserves, en HTTP comme en HTTPS.
+        - "traefik.http.routers.{{ module.name }}-alias.rule={% for h in redirect_hosts %}Host(`{{ h }}`){{ ' || ' if not loop.last else '' }}{% endfor %}"
+        - "traefik.http.routers.{{ module.name }}-alias.entrypoints=websecure"
+        - "traefik.http.routers.{{ module.name }}-alias.tls=true"
+        - "traefik.http.routers.{{ module.name }}-alias.tls.certresolver=letsencrypt"
+        - "traefik.http.routers.{{ module.name }}-alias.service={{ module.name }}"
+        - "traefik.http.routers.{{ module.name }}-alias.middlewares={{ module.name }}-to-canonical"
+        - "traefik.http.routers.{{ module.name }}-alias-http.rule={% for h in redirect_hosts %}Host(`{{ h }}`){{ ' || ' if not loop.last else '' }}{% endfor %}"
+        - "traefik.http.routers.{{ module.name }}-alias-http.entrypoints=web"
+        - "traefik.http.routers.{{ module.name }}-alias-http.service={{ module.name }}"
+        - "traefik.http.routers.{{ module.name }}-alias-http.middlewares={{ module.name }}-to-canonical"
+        - "traefik.http.middlewares.{{ module.name }}-to-canonical.redirectregex.regex=^https?://[^/]+(.*)$$"
+        - "traefik.http.middlewares.{{ module.name }}-to-canonical.redirectregex.replacement=https://{{ module.server_name }}$${1}"
+        - "traefik.http.middlewares.{{ module.name }}-to-canonical.redirectregex.permanent=true"
+{% endif %}
         - "traefik.http.services.{{ module.name }}.loadbalancer.server.port={{ module.internal_port | default('80') }}"
         # Redirection HTTP vers HTTPS
         - "traefik.http.routers.{{ module.name }}-http.rule=Host(`{{ module.server_name }}`)"
